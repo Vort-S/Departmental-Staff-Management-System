@@ -1,0 +1,109 @@
+name: CI and Vercel deployment
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install dependencies
+        run: npm install --no-fund
+      - name: Lint and type-check
+        run: npm run lint && npm run typecheck
+      - name: Executable offline smoke assertions
+        run: npm run test:smoke
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Preserve unit-test JSON separately
+        if: always()
+        run: test ! -f test-results/vitest.json || mv test-results/vitest.json test-results/vitest-unit.json
+      - name: Dependency audit (high and critical)
+        run: npm audit --audit-level=high
+      - name: Collect results
+        if: always()
+        run: npm run test:report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: unit-test-evidence, path: test-results/}
+  integration-and-e2e:
+    needs: quality
+    runs-on: ubuntu-latest
+    # Requires a dedicated, migrated Neon test branch. No production data may be used.
+    env:
+      NODE_ENV: development
+      APP_URL: http://localhost:3000
+      DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.NEON_TEST_DATABASE_URL_UNPOOLED }}
+      TEST_DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+      SESSION_SECRET: ${{ secrets.TEST_SESSION_SECRET }}
+      FIELD_ENCRYPTION_KEY: ${{ secrets.TEST_FIELD_ENCRYPTION_KEY }}
+      ALLOWED_URL_HOSTS: example.edu,drive.google.com,docs.google.com
+      E2E_MODE: 'true'
+      SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+      SEED_HOD_PASSWORD: ${{ secrets.SEED_HOD_PASSWORD }}
+      SEED_STAFF_PASSWORD: ${{ secrets.SEED_STAFF_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-fund
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with: {name: unit-test-evidence, path: test-results/}
+      - run: npm run test:smoke
+      - run: npm run db:migrate
+      - name: Seed dedicated test branch
+        run: npm run db:seed
+      - name: Prepare fake accounts for E2E
+        run: npx tsx scripts/prepare-e2e.ts
+      - name: Database integration tests
+        env:
+          DATABASE_URL: postgresql://unused:unused@localhost/unused
+          INTEGRATION_TESTS_ACK: 'YES'
+        run: npm run test:integration
+      - name: Playwright (desktop and mobile viewports)
+        run: npm run test:e2e
+      - name: Collect executed results
+        if: always()
+        run: npm run test:report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: integration-e2e-test-evidence, path: |
+          test-results/
+          playwright-report/}
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [quality, integration-and-e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-fund
+      - uses: actions/download-artifact@v4
+        with: {name: integration-e2e-test-evidence, path: .}
+      - name: Validate published test evidence
+        run: test -s test-results/latest.json
+      - name: Pull production Vercel environment
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Build production release
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Deploy production
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

@@ -1,0 +1,5 @@
+import {requireRole} from "@/lib/session";
+import {PageHead,Panel} from "@/components/ui";
+import {Download} from "lucide-react";
+const reports=[{key:"staff",title:"Staff directory",desc:"Active and archived-excluded staff records; no private fields"},{key:"courses",title:"Teaching allocation",desc:"Course assignments, staff and academic sessions"},{key:"leave",title:"Leave summary",desc:"Date ranges, decision status and staff ID (no reason text)"},{key:"publications",title:"Publications & achievements",desc:"Research publications, awards and grants"}];
+export default async function Reports(){await requireRole(["ADMIN","HOD"]);return <><PageHead title="Departmental reports" subtitle="Authorized, audited CSV exports with formula-injection protection"/><div className="grid md:grid-cols-2 gap-4">{reports.map(r=><Panel key={r.key}><h2 className="section-title">{r.title}</h2><p className="muted text-sm my-3">{r.desc}</p><a className="btn" href={`/api/reports/${r.key}`} download><Download size={17}/>Export CSV</a></Panel>)}</div><p className="text-sm muted">All exports are scoped to your department. The action is logged with actor, event and IP hash.</p></>}

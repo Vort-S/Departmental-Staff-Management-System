@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-11-16T14:56:38.308Z",
+  "source": "Node offline smoke: executed transpiled production TypeScript helpers; NOT Vitest/DB/E2E",
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "notRun": false
+  },
+  "results": [
+    {
+      "id": "U03",
+      "status": "PASSED",
+      "steps": "AES-256-GCM encrypt/decrypt + changed-key and authentication tag rejection",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    },
+    {
+      "id": "U04",
+      "status": "PASSED",
+      "steps": "Role + field permissions and self-approval restrictions",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    },
+    {
+      "id": "U05",
+      "status": "PASSED",
+      "steps": "Inclusive annual leave days, overlap and backdate cutoff",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    },
+    {
+      "id": "U06",
+      "status": "PASSED",
+      "steps": "Teaching load warning threshold",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    },
+    {
+      "id": "U07",
+      "status": "PASSED",
+      "steps": "CSV injection mitigation and embedded quote escaping",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    },
+    {
+      "id": "U08",
+      "status": "PASSED",
+      "steps": "Session idle and absolute timeout arithmetic",
+      "expected": "Assertions pass on executed production helper source",
+      "actual": "Passed in Node offline smoke execution"
+    }
+  ]
+}

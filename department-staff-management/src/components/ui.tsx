@@ -1,0 +1,9 @@
+import Link from "next/link";
+import type {ReactNode} from "react";
+export function PageHead({title,subtitle,action}:{title:string,subtitle?:string,action?:ReactNode}){return <div className="flex flex-wrap gap-3 justify-between items-start mb-7"><div><h1 className="page-title">{title}</h1>{subtitle&&<p className="muted mt-1 text-sm">{subtitle}</p>}</div>{action}</div>}
+export function Panel({title,children,subtitle}:{title?:string,children:ReactNode,subtitle?:string}){return <section className="card p-5 md:p-6 mb-5">{title&&<><h2 className="section-title">{title}</h2>{subtitle&&<p className="muted text-sm mt-1">{subtitle}</p>}<div className="mt-5"/></>}{children}</section>}
+export function Tag({children}:{children:ReactNode}){return <span className="tag">{children}</span>}
+export function Table({headers,rows,empty="No records found."}:{headers:string[],rows:ReactNode[][],empty?:string}){return <div className="table-wrap"><table><thead><tr>{headers.map((h,i)=><th key={i} scope="col">{h}</th>)}</tr></thead><tbody>{rows.length?rows.map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j}>{v}</td>)}</tr>):<tr><td colSpan={headers.length} className="py-8 text-center muted">{empty}</td></tr>}</tbody></table></div>}
+export function Stat({label,value,hint}:{label:string,value:string|number,hint?:string}){return <div className="card p-5"><p className="text-xs font-bold uppercase tracking-wider muted">{label}</p><p className="metric mt-3">{value}</p>{hint&&<p className="muted text-xs mt-1">{hint}</p>}</div>}
+export function Breadcrumb({label,href}:{label:string,href:string}){return <Link href={href} className="text-sm text-blue-700 hover:underline">← {label}</Link>}
+export const formatDate=(v:Date|string|null|undefined)=>v?new Date(v).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"—";

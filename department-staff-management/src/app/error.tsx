@@ -1,0 +1,3 @@
+"use client";
+import Link from "next/link";
+export default function Error({reset}:{error:Error & {digest?:string},reset:()=>void}){return <main className="min-h-screen grid place-items-center p-6"><div className="card p-9 max-w-md text-center"><h1 className="page-title">Something went wrong</h1><p className="muted text-sm mt-3 mb-6">The request could not be completed. Sensitive details are not displayed.</p><div className="flex gap-3 justify-center"><button className="btn" onClick={()=>reset()}>Try again</button><Link className="btn btn-outline" href="/">Home</Link></div></div></main>}

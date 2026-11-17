@@ -1,0 +1,5 @@
+import {requireUser,myStaff} from "@/lib/session";
+import {publicationList} from "@/lib/operations-data";
+import {PageHead,Panel,Table,Tag} from "@/components/ui";
+import {ActionForm} from "@/components/ActionForm";
+export default async function Publications(){const u=await requireUser(),me=await myStaff(u.id),rows=await publicationList(u);return <><PageHead title="Publications & achievements" subtitle="Research outputs, grants and awards"/><Panel title="Achievements register"><Table headers={["Staff","Category","Title","Year","Reference"]} rows={rows.map(r=>[r.name,<Tag key={r.id}>{r.category}</Tag>,r.title,String(r.year),r.url?<a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="text-blue-700">View</a>:"—"])}/></Panel>{me&&<Panel title="Add an achievement"><ActionForm variant="publication" submitLabel="Save achievement" fields={[{name:"category",label:"Category",type:"select",required:true,options:["PUBLICATION","GRANT","AWARD"].map(x=>({value:x,label:x}))},{name:"title",label:"Title",required:true},{name:"year",label:"Year",type:"number",required:true},{name:"url",label:"Reference URL (optional)",type:"url"}]}/></Panel>}</>}

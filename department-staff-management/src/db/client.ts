@@ -1,0 +1,11 @@
+import "server-only";
+import {Pool,neonConfig} from "@neondatabase/serverless";
+import WebSocket from "ws";
+import {drizzle} from "drizzle-orm/neon-serverless";
+import * as schema from "./schema";
+import {env} from "@/lib/env";
+neonConfig.webSocketConstructor=WebSocket;
+const globalDb=globalThis as unknown as {pool?:Pool};
+export const pool=globalDb.pool ?? new Pool({connectionString:env().DATABASE_URL,max:5,idleTimeoutMillis:10000});
+if(process.env.NODE_ENV!=="production")globalDb.pool=pool;
+export const db=drizzle({client:pool,schema});

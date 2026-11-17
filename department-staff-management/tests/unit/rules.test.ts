@@ -1,0 +1,13 @@
+import {describe,it,expect} from "vitest";
+import {canReadSensitive,canReadStaff,canDecideLeave,canAppraise,leaveDays,validateLeavePolicy,overlaps,overloaded,teachingUnits,csvCell,csvLine,isExpired} from "../../src/lib/rules";
+const admin={id:"a",role:"ADMIN" as const,departmentId:"dept"},hod={id:"h",role:"HOD" as const,departmentId:"dept"},alice={id:"s1",role:"STAFF" as const,departmentId:"dept"},bob={id:"s2",role:"STAFF" as const,departmentId:"dept"},profile={id:"staff",userId:"s2",departmentId:"dept"};
+describe("least-privilege rules",()=>{
+ it("[U04] scopes access by department, ownership and field",()=>{expect(canReadStaff(alice,profile)).toBe(true);expect(canReadSensitive(alice,profile,"nationalId")).toBe(false);expect(canReadSensitive(bob,profile,"nationalId")).toBe(true);expect(canReadSensitive(hod,profile,"phone")).toBe(true);expect(canReadSensitive(hod,profile,"nationalId")).toBe(false);expect(canReadSensitive(admin,profile,"nationalId")).toBe(true);expect(canReadStaff({...alice,departmentId:"other"},profile)).toBe(false)});
+ it("[U04] never approves own leave or appraisal",()=>{expect(canDecideLeave(hod,"h","dept")).toBe(false);expect(canDecideLeave(hod,"s1","dept")).toBe(true);expect(canDecideLeave(alice,"s2","dept")).toBe(false);expect(canAppraise(hod,{...profile,userId:"h"})).toBe(false)});
+});
+describe("business rules",()=>{
+ it("[U05] computes leave days, rejects bad range, checks overlap and backdating",()=>{expect(leaveDays("2026-11-18","2026-11-20")).toBe(3);expect(()=>leaveDays("2026-12-01","2026-11-01")).toThrow();expect(overlaps("2026-11-18","2026-11-20","2026-11-20","2026-11-22")).toBe(true);expect(validateLeavePolicy("2026-11-18","2026-11-19",new Date("2026-11-16T00:00:00Z"))).toBe(true);expect(validateLeavePolicy("2026-11-01","2026-11-02",new Date("2026-11-16T00:00:00Z"))).toBe(false)});
+ it("[U06] flags overload when above 12 units",()=>{expect(teachingUnits([3,3,4])).toBe(10);expect(overloaded([4,4,5])).toBe(true);expect(overloaded([3,3,3,3])).toBe(false)});
+ it("[U07] escapes CSV formula payloads and embedded quotes",()=>{for(const x of ["=1+1","+SUM(A1:A2)","@cmd","-2","\t=HYPERLINK(\"x\")"]){expect(csvCell(x)).toMatch(/^"'/)}expect(csvLine(["a, b",'he said "hello"'])).toContain('"he said ""hello"""')});
+ it("[U08] expires sessions on either timeout",()=>{const created=new Date("2026-01-01T00:00:00Z"),last=new Date("2026-01-01T00:20:00Z");expect(isExpired(created,last,new Date("2026-01-01T00:49:00Z"))).toBe(false);expect(isExpired(created,last,new Date("2026-01-01T00:50:00Z"))).toBe(true);expect(isExpired(created,new Date("2026-01-01T11:50:00Z"),new Date("2026-01-01T12:00:00Z"))).toBe(true)});
+});

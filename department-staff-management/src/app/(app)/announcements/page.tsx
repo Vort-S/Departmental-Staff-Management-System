@@ -1,0 +1,5 @@
+import {requireUser} from "@/lib/session";
+import {noticeList} from "@/lib/operations-data";
+import {PageHead,Panel,formatDate} from "@/components/ui";
+import {ActionForm} from "@/components/ActionForm";
+export default async function Notices(){const u=await requireUser(),items=await noticeList(u);return <><PageHead title="Announcements & memos" subtitle="Official departmental communication"/>{u.role!=="STAFF"&&<Panel title="Publish announcement"><ActionForm variant="notice" submitLabel="Publish memo" fields={[{name:"title",label:"Announcement title",required:true},{name:"body",label:"Message (plain text)",type:"textarea",required:true}]}/></Panel>}{items.length?items.map(n=><Panel key={n.id}><div className="flex justify-between gap-4"><h2 className="section-title">{n.title}</h2><time className="muted text-xs">{formatDate(n.createdAt)}</time></div><p className="prose-content text-sm text-slate-700 mt-3 leading-relaxed">{n.body}</p></Panel>):<Panel>No announcements yet.</Panel>}</>}

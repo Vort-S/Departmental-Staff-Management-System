@@ -1,6 +1,6 @@
 # Deployment runbook — Neon + Vercel
 
-**Current state (16 November 2026):** A Neon PostgreSQL 17 project `university-dsms-semi-project` was actually created in `aws-us-east-1`, with `production` (default), `development` and `test` branches. Database schemas have **not yet been migrated**, no sample data has been seeded and no Vercel deployment has been published. Do not imply the application is live. Connection credentials are intentionally not stored in the repository or this document.
+**Current state (16 November 2026):** A Neon PostgreSQL 17 project `university-dsms-semi-project` was actually created in `aws-us-east-1`, with `production` (default), `development` and `test` branches. Database schemas have **not yet been migrated**, no sample data has been seeded and a Vercel project has been created with Node.js 22 and initial security settings, but no Git source has been linked, no Vercel environment variables are configured and no deployment has been published. Do not imply the application is live. Connection credentials are intentionally not stored in the repository or this document.
 
 ## 1. Provision Neon databases (completed)
 
@@ -91,3 +91,8 @@ Use `/api/health` for DB availability (200 healthy; 503 unavailable), Vercel Log
 - [ ] Measured Lighthouse scores and database p95 latency
 - [ ] Performed point-in-time restore rehearsal in a throwaway branch
 - [ ] Staff PII retention / access / incident response approved by the institution
+
+
+## Vercel connection created after this document was written
+
+For the verified existing Vercel project identity and outstanding blockers, see [VERCEL-STATUS.md](VERCEL-STATUS.md). The included `.vercel/project.json` can link the extracted project to the existing Vercel project for CLI deployments. Do not create a duplicate project.

@@ -1,4 +1,12 @@
+import type {Metadata} from "next";
+export const metadata:Metadata={title:"Sign in",robots:{index:false,follow:false}};
 import Link from "next/link";
 import {ActionForm} from "@/components/ActionForm";
-import {ShieldCheck} from "lucide-react";
-export default function Login(){return <main className="min-h-screen grid place-items-center p-5 bg-[#f1f5fb]"><div className="w-full max-w-md"><Link className="block font-black text-blue-900 text-2xl text-center mb-7" href="/">DSMS<span className="text-blue-500">.</span></Link><div className="card p-7 sm:p-9"><ShieldCheck size={27} className="text-blue-700 mb-4"/><h1 className="text-2xl font-extrabold">Welcome back</h1><p className="muted text-sm my-3 mb-6">Sign in to your departmental workspace.</p><ActionForm variant="login" submitLabel="Secure sign in" redirectTo="/dashboard" fields={[{name:"email",label:"Email address",type:"email",required:true},{name:"password",label:"Password",type:"password",required:true}]}/><div className="mt-6 flex flex-wrap justify-between gap-2 text-sm"><Link className="text-blue-700" href="/forgot">Forgot password?</Link><Link className="text-blue-700" href="/register">Request access</Link></div></div><p className="text-center text-xs muted mt-5">Protected by Argon2id and expiring sessions.</p></div></main>}
+import {AuthShell} from "@/components/AuthShell";
+export default function Login(){return <AuthShell title="Sign in to your department" description="Use your approved staff account to access records, courses and leave requests.">
+  <ActionForm variant="login" submitLabel="Sign in" redirectTo="/dashboard" fields={[{name:"email",label:"Email address",type:"email",required:true},{name:"password",label:"Password",type:"password",required:true}]}/>
+  <div className="mt-7 pt-5 border-t border-[var(--color-border)] flex flex-wrap justify-between gap-x-4 gap-y-2 text-sm">
+    <Link className="font-semibold text-[var(--color-accent)] hover:underline" href="/forgot">Forgot password?</Link>
+    <Link className="text-[var(--color-accent)] hover:underline" href="/register">Request staff access</Link>
+  </div>
+</AuthShell>}

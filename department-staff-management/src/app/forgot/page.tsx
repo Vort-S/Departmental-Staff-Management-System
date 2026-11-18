@@ -1,2 +1,9 @@
-import Link from "next/link";import {ActionForm} from "@/components/ActionForm";
-export default function Forgot(){return <main className="min-h-screen grid place-items-center p-5"><div className="card p-8 w-full max-w-md"><h1 className="page-title mb-2">Reset password</h1><p className="muted text-sm mb-6">If an account exists, we will email a single-use reset link.</p><ActionForm variant="forgot" submitLabel="Send reset link" fields={[{name:"email",label:"Email",type:"email",required:true}]}/><Link className="text-blue-700 text-sm mt-6 block" href="/login">Back to login</Link></div></main>}
+import type {Metadata} from "next";
+export const metadata:Metadata={title:"Reset password",robots:{index:false,follow:false}};
+import Link from "next/link";
+import {ActionForm} from "@/components/ActionForm";
+import {AuthShell} from "@/components/AuthShell";
+export default function Forgot(){return <AuthShell title="Reset your password" description="If an account exists for that email, we will send a single-use password reset link.">
+  <ActionForm variant="forgot" submitLabel="Send reset link" fields={[{name:"email",label:"Email address",type:"email",required:true}]}/>
+  <Link className="inline-flex min-h-11 items-center font-semibold text-sm text-[var(--color-accent)] hover:underline mt-5" href="/login">Back to sign in</Link>
+</AuthShell>}

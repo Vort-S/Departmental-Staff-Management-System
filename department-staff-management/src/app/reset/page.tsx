@@ -1,2 +1,7 @@
+import type {Metadata} from "next";
+export const metadata:Metadata={title:"Choose a new password",robots:{index:false,follow:false}};
 import {ActionForm} from "@/components/ActionForm";
-export default async function Reset({searchParams}:{searchParams:Promise<{token?:string}>}){const {token}=await searchParams;return <main className="min-h-screen grid place-items-center p-5"><div className="card p-8 w-full max-w-md"><h1 className="page-title mb-2">Choose a new password</h1><p className="muted text-sm mb-6">This link expires after 30 minutes and can be used once.</p><ActionForm variant="reset" submitLabel="Update password" redirectTo="/login" fields={[{name:"token",label:"Token",type:"hidden",defaultValue:token??""},{name:"password",label:"New password",type:"password",required:true}]}/></div></main>}
+import {AuthShell} from "@/components/AuthShell";
+export default async function Reset({searchParams}:{searchParams:Promise<{token?:string}>}){const {token}=await searchParams;return <AuthShell title="Choose a new password" description="The password reset link expires after 30 minutes and can only be used once.">
+  <ActionForm variant="reset" submitLabel="Update password" redirectTo="/login" fields={[{name:"token",label:"Token",type:"hidden",defaultValue:token??""},{name:"password",label:"New password",type:"password",required:true}]}/>
+</AuthShell>}

@@ -3,7 +3,6 @@ import {hash as argonHash,verify as argonVerify} from "@node-rs/argon2";
 import {env} from "./env";
 export const randomToken=()=>randomBytes(32).toString("base64url");
 export const tokenDigest=(s:string, secret=env().SESSION_SECRET)=>createHmac("sha256",secret).update(s).digest("hex");
-// @node-rs/argon2 defaults to Argon2id. Avoid its ambient const enum with isolatedModules.
 export const hashPassword=(s:string)=>argonHash(s,{memoryCost:19456,timeCost:3,parallelism:1,outputLen:32});
 export const verifyPassword=async(hash:string,password:string)=>{try{return await argonVerify(hash,password)}catch{return false}};
 export const crypt=(plain:string,key:Buffer=Buffer.from(env().FIELD_ENCRYPTION_KEY,"base64"))=>{const iv=randomBytes(12);const cipher=createCipheriv("aes-256-gcm",key,iv);const data=Buffer.concat([cipher.update(plain,"utf8"),cipher.final()]);return ["v1",iv.toString("base64url"),cipher.getAuthTag().toString("base64url"),data.toString("base64url")].join(".")};

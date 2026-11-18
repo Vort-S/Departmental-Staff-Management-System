@@ -1,6 +1,5 @@
 # Departmental Staff Management System (DSMS)
 
-
 **University semi-project:** Building Web Applications: Web Application Security, Testing, Deployment and Review.
 
 A role-aware Next.js + TypeScript application for a university department, with Drizzle ORM and Neon PostgreSQL. This project contains source code, SQL migrations, a fictional dataset generator, security and browser tests, deployment configuration, and public `/security`, `/testing`, `/review` demonstration pages.
@@ -148,3 +147,8 @@ drizzle/            Baseline SQL migration, reversal and journal
 - [REVIEW.md](REVIEW.md) — project review, evidence, observed constraints and roadmap
 
 **Important design limitations:** single-department onboarding picks the first configured department; create additional tenant-aware onboarding before supporting multiple departments. External documents are allowlisted references rather than secure binary uploads. Non-annual leave entitlement policies are not modeled in depth. HOD leave requires a second authorized HOD or separate governance procedure. Sample data and app are for evaluation, **not** real staff PII prior to independent security verification.
+
+
+## Vercel project link
+
+The Vercel project was created and its Node.js / Next.js settings were configured, but no deployment has been published. See [VERCEL-STATUS.md](VERCEL-STATUS.md) for the dashboard link and prerequisites.

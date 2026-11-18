@@ -2,7 +2,7 @@
 import {useEffect,useState,useTransition} from "react";
 import Link from "next/link";
 import {usePathname,useRouter} from "next/navigation";
-import {LayoutDashboard,Users,BookOpen,CalendarDays,ClipboardCheck,FileCheck2,GraduationCap,Star,Megaphone,FileDown,ShieldCheck,FlaskConical,NotebookPen,Settings,Menu,X,LogOut,UserRound,LockKeyhole,LoaderCircle} from "lucide-react";
+import {LayoutDashboard,Users,BookOpen,CalendarDays,ClipboardCheck,FileCheck2,GraduationCap,Star,Megaphone,FileDown,ShieldCheck,FlaskConical,NotebookPen,Settings,Menu,X,LogOut,UserRound,LockKeyhole,LoaderCircle,Building2} from "lucide-react";
 import {logout} from "@/actions/auth";
 
 type Role = "ADMIN" | "HOD" | "STAFF";
@@ -49,7 +49,7 @@ export function Nav({role,email}:{role:Role,email:string}) {
   };
   return <>
     <div className="mobile-head">
-      <Link className="font-bold text-[var(--color-text)] tracking-tight" href="/dashboard">DSMS <span className="font-normal text-sm text-[var(--color-muted)]">/ Department</span></Link>
+      <Link className="inline-flex items-center gap-2 font-bold text-[var(--color-text)] tracking-tight" href="/dashboard"><span className="brand-mark !w-8 !h-8"><Building2 size={17} aria-hidden="true"/></span>DSMS</Link>
       <button className="inline-flex w-11 h-11 items-center justify-center rounded-[var(--radius-control)] text-[var(--color-text)] hover:bg-[var(--color-surface-soft)]" type="button" aria-label={open?"Close navigation menu":"Open navigation menu"} aria-expanded={open} aria-controls="sidebar-navigation" onClick={()=>setOpen(v=>!v)}>
         {open?<X size={22} aria-hidden="true"/>:<Menu size={22} aria-hidden="true"/>}
       </button>
@@ -57,9 +57,8 @@ export function Nav({role,email}:{role:Role,email:string}) {
     {open&&<button type="button" aria-label="Close navigation menu" className="mobile-menu-overlay" onClick={()=>setOpen(false)}/>}
     <aside id="sidebar-navigation" className={`sidebar ${open?"sidebar-open":""}`} aria-label="Department navigation">
       <div className="px-5 pt-7 pb-5 border-b border-white/15">
-        <Link href="/dashboard" onClick={()=>setOpen(false)} className="text-xl font-bold tracking-tight text-white hover:text-white">DSMS</Link>
-        <p className="text-sm mt-2 text-white/80">Departmental Staff Management</p>
-        <div className="mt-4 rounded-[var(--radius-control)] bg-white/10 px-3 py-3 text-xs">
+        <Link href="/dashboard" onClick={()=>setOpen(false)} className="inline-flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-white hover:text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15"><Building2 size={20} aria-hidden="true"/></span>DSMS</Link>
+        <div className="mt-5 rounded-[var(--radius-control)] bg-white/10 px-3.5 py-3.5 text-xs">
           <p className="font-bold text-white">{role==="HOD"?"Head of department":role==="ADMIN"?"Administrator":"Staff"}</p>
           <p className="text-white/80 truncate mt-1" title={email}>{email}</p>
         </div>

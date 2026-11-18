@@ -22,15 +22,45 @@ export async function register(input:unknown){try{await assertSameOrigin();const
   await tokenFor(u.id,"EMAIL",u.email);await audit("ACCOUNT_REGISTERED",u.id,"user",u.id);
   return response("Check your email to verify your account; administrator approval is also required.");
  }catch{return safeError()}}
-export async function login(input:unknown){try{await assertSameOrigin();const data=loginSchema.parse(input),ip=await clientIpHash();if(!await checkRateLimit("login_ip",ip,12,15*60_000,30*60_000)||!await checkRateLimit("login_account",data.email,6,15*60_000,30*60_000))return safeError();
-  const [u]=await db.select().from(users).where(eq(users.email,data.email)).limit(1);
-  // Run Argon2 even for nonexistent accounts to reduce account-enumeration timing differences.
-  const valid=u?await verifyPassword(u.passwordHash,data.password):await verifyPassword(await hashPassword(randomToken()),data.password);
-  if(!u||!valid||u.status!=="ACTIVE"||!u.emailVerifiedAt||u.archivedAt||u.lockedUntil&&u.lockedUntil>new Date()){
-   if(u){const n=u.failedLoginCount+1;await db.update(users).set({failedLoginCount:n,lockedUntil:n>=6?new Date(Date.now()+30*60_000):null}).where(eq(users.id,u.id));}await audit("LOGIN_FAILED",u?.id??null,"auth");return safeError();
+/** Authentication feedback is deliberately specific only after a correct password.
+ * Do not expose whether an email address belongs to an account on a failed login.
+ */
+export async function login(input:unknown){
+  try {
+    await assertSameOrigin();
+  } catch {
+    return {ok:false as const,error:"This sign-in page is out of date. Reload it and try again.",code:"REQUEST_ORIGIN"};
   }
-  await db.update(users).set({failedLoginCount:0,lockedUntil:null}).where(eq(users.id,u.id));await createSession(u);await audit("LOGIN_SUCCESS",u.id,"auth");return response("Welcome back.");
- }catch{return safeError()}}
+  const parsed=loginSchema.safeParse(input);
+  if(!parsed.success)return {ok:false as const,error:"Enter a valid email address and password.",code:"INVALID_INPUT"};
+  const data=parsed.data;
+  try {
+    const ip=await clientIpHash();
+    if(!await checkRateLimit("login_ip",ip,12,15*60_000,30*60_000)||!await checkRateLimit("login_account",data.email,6,15*60_000,30*60_000))
+      return {ok:false as const,error:"Too many sign-in attempts. Try again in 30 minutes or use password recovery.",code:"RATE_LIMIT"};
+    const [u]=await db.select().from(users).where(eq(users.email,data.email)).limit(1);
+    // Preserve constant-work verification for unknown addresses to limit enumeration.
+    const valid=u?await verifyPassword(u.passwordHash,data.password):await verifyPassword(await hashPassword(randomToken()),data.password);
+    if(!u||!valid){
+      if(u){const n=u.failedLoginCount+1;await db.update(users).set({failedLoginCount:n,lockedUntil:n>=6?new Date(Date.now()+30*60_000):null}).where(eq(users.id,u.id));}
+      await audit("LOGIN_FAILED",u?.id??null,"auth");
+      return {ok:false as const,error:"Email or password is incorrect. Please try again.",code:"INVALID_CREDENTIALS"};
+    }
+    // Account-specific status is revealed only after successfully verifying the password.
+    if(u.archivedAt||u.status==="SUSPENDED")return {ok:false as const,error:"This account is unavailable. Contact your department administrator.",code:"ACCOUNT_UNAVAILABLE"};
+    if(u.status==="PENDING")return {ok:false as const,error:"Your account is awaiting administrator approval.",code:"AWAITING_APPROVAL"};
+    if(!u.emailVerifiedAt)return {ok:false as const,error:"Check your inbox and verify your email address before signing in.",code:"EMAIL_UNVERIFIED"};
+    if(u.lockedUntil&&u.lockedUntil>new Date())return {ok:false as const,error:"This account is temporarily locked after unsuccessful attempts. Try again later or reset your password.",code:"ACCOUNT_LOCKED"};
+    await db.update(users).set({failedLoginCount:0,lockedUntil:null}).where(eq(users.id,u.id));
+    await createSession(u);
+    await audit("LOGIN_SUCCESS",u.id,"auth");
+    return response("Signed in successfully.");
+  } catch (cause) {
+    // Name and stable code only: never log credentials, session tokens, or account addresses.
+    console.error("[auth.login] SIGN_IN_UNAVAILABLE",{kind:cause instanceof Error?cause.name:"UnknownError"});
+    return {ok:false as const,error:"Sign-in is temporarily unavailable. Please try again. If the issue continues, contact the administrator (SIGN_IN_UNAVAILABLE).",code:"SIGN_IN_UNAVAILABLE"};
+  }
+}
 export async function logout(){try{await assertSameOrigin();const u=await getUser();await clearSession();if(u)await audit("LOGOUT",u.id,"auth");return response("Signed out.")}catch{return safeError()}}
 export async function logoutAll(){try{await assertSameOrigin();const u=await getUser();if(!u)return safeError();await revokeAll(u.id);await clearSession();await audit("ALL_SESSIONS_REVOKED",u.id,"auth");return response("All devices signed out.")}catch{return safeError()}}
 export async function requestReset(input:unknown){try{await assertSameOrigin();const {email:address}=resetRequestSchema.parse(input),ip=await clientIpHash();if(!await checkRateLimit("reset",ip,4,3600_000,3600_000))return response("If the account exists, instructions will be emailed.");const [u]=await db.select().from(users).where(eq(users.email,address)).limit(1);if(u&&u.status==="ACTIVE")await tokenFor(u.id,"RESET",u.email);return response("If the account exists, instructions will be emailed.")}catch{return response("If the account exists, instructions will be emailed.")}}

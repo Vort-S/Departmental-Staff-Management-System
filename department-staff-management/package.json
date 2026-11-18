@@ -1,6 +1,6 @@
 {
   "name": "department-staff-management", "version": "1.0.0", "private": true,
-  "engines": {"node": ">=20.11"},
+  "engines": {"node": "22.x"},
   "scripts": {
     "dev": "next dev", "build": "next build", "start": "next start", "lint": "eslint .", "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate", "db:migrate": "drizzle-kit migrate", "db:seed": "tsx scripts/seed.ts",

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import type {Metadata} from "next";
 import {ArrowRight,BookOpen,CalendarDays,ClipboardCheck,FileText,Search,ShieldCheck,Users,Check,Building2} from "lucide-react";

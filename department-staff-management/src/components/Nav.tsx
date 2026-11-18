@@ -2,33 +2,43 @@
 import {useEffect,useState,useTransition} from "react";
 import Link from "next/link";
 import {usePathname,useRouter} from "next/navigation";
-import {LayoutDashboard,Users,BookOpen,CalendarDays,ClipboardCheck,FileCheck2,GraduationCap,Star,Megaphone,FileDown,ShieldCheck,FlaskConical,NotebookPen,Settings,Menu,X,LogOut,UserRound,LockKeyhole,LoaderCircle,Building2} from "lucide-react";
+import {LayoutDashboard,Users,BookOpen,CalendarDays,ClipboardCheck,FileCheck2,GraduationCap,Star,Megaphone,FileDown,ShieldCheck,FlaskConical,NotebookPen,Settings,ChevronDown,Menu,X,LogOut,UserRound,LockKeyhole,LoaderCircle,Building2} from "lucide-react";
 import {logout} from "@/actions/auth";
 
 type Role = "ADMIN" | "HOD" | "STAFF";
-const items = [
-  {href:"/dashboard",text:"Dashboard",icon:LayoutDashboard},
-  {href:"/profile",text:"My profile",icon:UserRound},
-  {href:"/staff",text:"Staff directory",icon:Users},
-  {href:"/courses",text:"Courses & load",icon:BookOpen},
-  {href:"/leave",text:"Leave requests",icon:CalendarDays},
-  {href:"/attendance",text:"Attendance",icon:ClipboardCheck},
-  {href:"/documents",text:"Documents",icon:FileCheck2},
-  {href:"/publications",text:"Publications",icon:GraduationCap},
-  {href:"/appraisals",text:"Appraisals",icon:Star},
-  {href:"/announcements",text:"Announcements",icon:Megaphone},
-  {href:"/reports",text:"Reports",icon:FileDown,roles:["ADMIN","HOD"]},
-  {href:"/admin",text:"Administration",icon:Settings,roles:["ADMIN"]}
+type NavItem={href:string,text:string,icon:typeof LayoutDashboard,roles?:Role[]};
+const groups:{title:string,items:NavItem[]}[]=[
+  {title:"Workspace",items:[
+    {href:"/dashboard",text:"Overview",icon:LayoutDashboard},
+    {href:"/staff",text:"Staff directory",icon:Users},
+    {href:"/profile",text:"My profile",icon:UserRound}
+  ]},
+  {title:"Academic work",items:[
+    {href:"/courses",text:"Courses & load",icon:BookOpen},
+    {href:"/publications",text:"Publications",icon:GraduationCap},
+    {href:"/appraisals",text:"Appraisals",icon:Star}
+  ]},
+  {title:"Operations",items:[
+    {href:"/leave",text:"Leave requests",icon:CalendarDays},
+    {href:"/attendance",text:"Attendance",icon:ClipboardCheck},
+    {href:"/documents",text:"Documents",icon:FileCheck2},
+    {href:"/announcements",text:"Announcements",icon:Megaphone}
+  ]},
+  {title:"Management",items:[
+    {href:"/reports",text:"Reports",icon:FileDown,roles:["ADMIN","HOD"]},
+    {href:"/admin",text:"Administration",icon:Settings,roles:["ADMIN"]}
+  ]}
 ];
-const resources = [
+const accountItems:NavItem[]=[{href:"/change-password",text:"Change password",icon:LockKeyhole}];
+const projectItems:NavItem[]=[
   {href:"/security",text:"Security",icon:ShieldCheck},
   {href:"/testing",text:"Testing",icon:FlaskConical},
-  {href:"/review",text:"Project review",icon:NotebookPen},
-  {href:"/change-password",text:"Change password",icon:LockKeyhole}
+  {href:"/review",text:"Project review",icon:NotebookPen}
 ];
 
 export function Nav({role,email}:{role:Role,email:string}) {
   const [open,setOpen] = useState(false);
+  const [signOutError,setSignOutError] = useState("");
   const [signingOut,startSignOut] = useTransition();
   const path = usePathname();
   const router = useRouter();
@@ -64,11 +74,28 @@ export function Nav({role,email}:{role:Role,email:string}) {
         </div>
       </div>
       <nav className="px-3 py-4" aria-label="Primary">
-        <div className="space-y-1">{items.filter(i=>!i.roles||i.roles.includes(role)).map(navItem)}</div>
-        <p className="px-3.5 pt-6 pb-2 text-[11px] font-semibold tracking-wide uppercase text-white/65">Account & project</p>
-        <div className="space-y-1">{resources.map(navItem)}</div>
-        <button type="button" disabled={signingOut} aria-busy={signingOut} onClick={()=>startSignOut(async()=>{try{await logout();router.push("/login");router.refresh();}catch{/* The server retains the session; allow a retry. */}})}
-          className="nav-signout nav-link w-full flex gap-3 items-center rounded-[var(--radius-control)] px-3.5 py-2 text-sm font-medium text-left">
+        {groups.map(group=>{
+          const visible=group.items.filter(item=>!item.roles||item.roles.includes(role));
+          if(!visible.length)return null;
+          return <div key={group.title} className="mb-4">
+            <h2 className="sidebar-group-heading">{group.title}</h2>
+            <div className="space-y-0.5">{visible.map(navItem)}</div>
+          </div>;
+        })}
+        <div className="mt-5 pt-3 border-t border-white/15">
+          <h2 className="sidebar-group-heading">Your account</h2>
+          <div className="space-y-0.5">{accountItems.map(navItem)}</div>
+          <details className="sidebar-resources group mt-2" open={projectItems.some(item=>active(item.href))||undefined}>
+            <summary className="nav-link flex items-center justify-between gap-2 rounded-[var(--radius-control)] px-3.5 py-3 text-sm font-medium cursor-pointer">
+              Project information <ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180" aria-hidden="true"/>
+            </summary>
+            <div className="mt-1 ml-2 pl-2 border-l border-white/20 space-y-0.5">{projectItems.map(navItem)}</div>
+          </details>
+        </div>
+        {signOutError&&<p role="alert" className="mx-3 mt-3 text-sm text-[#ffdde1]">{signOutError}</p>}
+        <button type="button" disabled={signingOut} aria-busy={signingOut}
+          onClick={()=>{setSignOutError("");startSignOut(async()=>{try{await logout();router.push("/login");router.refresh();}catch{setSignOutError("Sign out failed. Please try again.");}});}}
+          className="nav-signout nav-link w-full flex gap-3 items-center rounded-[var(--radius-control)] px-3.5 py-2 text-sm font-medium text-left mt-2">
           {signingOut?<LoaderCircle size={18} className="animate-spin shrink-0" aria-hidden="true"/>:<LogOut size={18} strokeWidth={1.9} className="shrink-0" aria-hidden="true"/>}
           {signingOut?"Signing out…":"Sign out"}
         </button>

@@ -42,7 +42,6 @@ export function Nav({role,email}:{role:Role,email:string}) {
   const [signingOut,startSignOut] = useTransition();
   const path = usePathname();
   const router = useRouter();
-  useEffect(()=>{setOpen(false)},[path]);
   useEffect(()=>{
     if(!open)return;
     const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setOpen(false)};

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import type {Metadata} from "next";
 export const metadata:Metadata={title:"Project review"};
 import Link from "next/link";

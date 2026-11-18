@@ -3,7 +3,7 @@ import {NextRequest,NextResponse} from "next/server";
 const restricted=["/dashboard","/profile","/staff","/courses","/leave","/attendance","/documents","/publications","/appraisals","/announcements","/reports","/admin","/change-password"];
 export async function proxy(request:NextRequest){
  const nonce=crypto.randomUUID().replaceAll("-","");const isDev=process.env.NODE_ENV!=="production";
- const csp=["default-src 'self'",`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev?" 'unsafe-eval'":""}`,`style-src 'self' 'nonce-${nonce}'${isDev?" 'unsafe-inline'":""}`,"img-src 'self' data: https:","font-src 'self'", `connect-src 'self'${isDev?" ws://localhost:*":""}`, "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'", "upgrade-insecure-requests"].join("; ");
+ const csp=["default-src 'self'",`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev?" 'unsafe-eval'":""}`,`style-src 'self' 'nonce-${nonce}'${isDev?" 'unsafe-inline'":""}`,"style-src-attr 'unsafe-inline'","img-src 'self' data: https:","font-src 'self'", `connect-src 'self'${isDev?" ws://localhost:*":""}`, "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'", "upgrade-insecure-requests"].join("; ");
  const headers=new Headers(request.headers);headers.set("x-nonce",nonce);headers.set("Content-Security-Policy",csp);
  const pathname=request.nextUrl.pathname;let response:NextResponse|undefined;
  if(restricted.some(p=>pathname===p||pathname.startsWith(p+"/"))){

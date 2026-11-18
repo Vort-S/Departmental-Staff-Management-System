@@ -13,13 +13,13 @@ export default async function Admin(){
  const active=accounts.filter(a=>a.status==="ACTIVE");
  const verified=accounts.filter(a=>a.emailVerifiedAt);
  return <>
-  <PageHead title="Account administration" subtitle="Review registrations, manage access and invite colleagues."/>
+  <PageHead title="Account management" subtitle="Review access requests and manage departmental accounts."/>
   <section className="admin-summary" aria-label="Account statistics">
     <div className="admin-summary-item"><p className="muted text-sm font-medium">Awaiting approval</p><p>{ready.length}</p></div>
     <div className="admin-summary-item"><p className="muted text-sm font-medium">Active accounts</p><p>{active.length}</p></div>
     <div className="admin-summary-item"><p className="muted text-sm font-medium">Verified emails</p><p>{verified.length}</p></div>
   </section>
-  <Panel title="Accounts awaiting approval" subtitle="Only verified accounts can be approved.">
+  <Panel title="Pending registration" subtitle="Verify each request before granting access.">
    {pending.length===0?<div className="dashboard-caught-up"><p className="font-semibold text-sm">No registrations waiting for review.</p></div>:
     <Table headers={["Account","Verification","Role","Review"]} empty="No registrations waiting for review" rows={pending.map(a=>[
      <div key={a.id}><p className="font-semibold break-all">{a.email}</p><p className="muted text-xs mt-1">{a.requestedStaffId||"No staff ID"}</p></div>,
@@ -28,7 +28,7 @@ export default async function Admin(){
      a.emailVerifiedAt?<ActionButton key={a.id} kind="approveUser" id={a.id} label="Approve account"/>:<span key={a.id} className="muted text-sm">Not ready</span>
     ])}/>}
   </Panel>
-  <Panel title="Active and suspended accounts" subtitle="Change roles or access for existing staff.">
+  <Panel title="Staff account access" subtitle="Manage existing roles and account status.">
     <Table headers={["Account","Role","Status","Manage"]} empty="No existing staff accounts" rows={accounts.filter(a=>a.status!=="PENDING").map(a=>[
      <div key={a.id}><p className="font-semibold break-all">{a.email}</p><p className="muted text-xs mt-1">{a.requestedStaffId||"—"}</p></div>,
      <Tag key={a.id}>{a.role}</Tag>,
@@ -40,7 +40,7 @@ export default async function Admin(){
      </div>
     ])}/>
   </Panel>
-  <Panel title="Invite a staff member" subtitle="An invitation is emailed to the selected address.">
+  <Panel title="Invite staff" subtitle="Send an invitation to a departmental email address.">
     <ActionForm variant="invite" submitLabel="Send invitation" fields={[{name:"email",label:"Email address",type:"email",required:true},{name:"role",label:"Assigned role",type:"select",required:true,options:[{value:"STAFF",label:"Staff"},{value:"HOD",label:"Head of department"}]}]}/>
   </Panel>
   <Panel title="Recent security activity">

@@ -9,7 +9,7 @@ import {isManager} from "@/lib/rules";
 import {PageHead,Panel,Stat,Table,Tag,formatDate} from "@/components/ui";
 export default async function Dashboard(){const u=await requireUser(),manager=isManager(u),me=await myStaff(u.id);const announcements=await noticeList(u);
  if(!manager){const myAssignments=(await assignments(u)).filter(a=>a.staffId===me?.id),myRequests=await leaveList(u),bal=me?await balance(me.id):null;
- const filled=me?[me.fullName,me.specialization,me.qualifications,me.officeLocation,me.phone,me.photoUrl].filter(Boolean).length:0;return <><PageHead title="My dashboard" subtitle="Your teaching assignments, leave requests and profile details"/><div className="grid md:grid-cols-3 gap-4 mb-6"><Stat label="Profile completion" value={`${Math.round(filled/6*100)}%`} hint="Complete your profile to improve directory accuracy"/><Stat label="Assigned courses" value={myAssignments.length} hint="Across all sessions"/><Stat label="Annual leave remaining" value={bal?.remaining??"—"} hint="Calendar days in this year"/></div><div className="grid lg:grid-cols-2 gap-5"><Panel title="My teaching load"><p className="text-sm muted mb-4">Course units: <b>{myAssignments.reduce((n,a)=>n+a.units,0)}</b></p><Table headers={["Code","Course","Session"]} rows={myAssignments.slice(0,6).map(x=>[x.code,x.title,x.session])}/><Link href="/courses" className="text-sm text-[var(--color-accent)] mt-4 block">View all courses →</Link></Panel><Panel title="My recent leave"><Table headers={["Type","Dates","Status"]} rows={myRequests.slice(0,5).map(x=>[x.type,`${x.startDate} — ${x.endDate}`,<Tag key={x.id}>{x.status}</Tag>])}/><Link className="text-sm text-[var(--color-accent)] mt-4 block" href="/leave">Manage leave requests →</Link></Panel></div><Panel title="Latest notices">{announcements.length===0&&<p className="muted text-sm py-4">No departmental notices have been published yet.</p>}{announcements.slice(0,4).map(a=><article key={a.id} className="border-b last:border-0 py-3"><h3 className="font-semibold">{a.title}</h3><p className="text-sm muted mt-1 prose-content line-clamp-2">{a.body}</p></article>)}</Panel></>}
+ const filled=me?[me.fullName,me.specialization,me.qualifications,me.officeLocation,me.phone,me.photoUrl].filter(Boolean).length:0;return <><PageHead title="My workspace" subtitle="Your courses, leave requests and staff profile."/><div className="grid md:grid-cols-3 gap-4 mb-6"><Stat label="Profile completion" value={`${Math.round(filled/6*100)}%`} hint="Complete your profile to improve directory accuracy"/><Stat label="Assigned courses" value={myAssignments.length} hint="Across all sessions"/><Stat label="Annual leave remaining" value={bal?.remaining??"—"} hint="Calendar days in this year"/></div><div className="grid lg:grid-cols-2 gap-5"><Panel title="My teaching load"><p className="text-sm muted mb-4">Course units: <b>{myAssignments.reduce((n,a)=>n+a.units,0)}</b></p><Table headers={["Code","Course","Session"]} rows={myAssignments.slice(0,6).map(x=>[x.code,x.title,x.session])}/><Link href="/courses" className="text-sm text-[var(--color-accent)] mt-4 block">View all courses →</Link></Panel><Panel title="My recent leave"><Table headers={["Type","Dates","Status"]} rows={myRequests.slice(0,5).map(x=>[x.type,`${x.startDate} — ${x.endDate}`,<Tag key={x.id}>{x.status}</Tag>])}/><Link className="text-sm text-[var(--color-accent)] mt-4 block" href="/leave">Manage leave requests →</Link></Panel></div><Panel title="Latest notices">{announcements.length===0&&<p className="muted text-sm py-4">No notices have been published.</p>}{announcements.slice(0,4).map(a=><article key={a.id} className="border-b last:border-0 py-3"><h3 className="font-semibold">{a.title}</h3><p className="text-sm muted mt-1 prose-content line-clamp-2">{a.body}</p></article>)}</Panel></>}
  const now=new Date(),day=now.getUTCDay(),monday=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()-((day+6)%7))),sunday=new Date(monday.getTime()+6*86400_000);
  const startWeek=monday.toISOString().slice(0,10),endWeek=sunday.toISOString().slice(0,10);
  const [countRows,types,statRows,rankRows,pending,assigned,onLeave]=await Promise.all([
@@ -31,7 +31,7 @@ export default async function Dashboard(){const u=await requireUser(),manager=is
   <section className="dashboard-intro dashboard-welcome mb-6 flex flex-wrap items-center justify-between gap-5 px-6 py-7 sm:px-8 sm:py-9" aria-labelledby="dashboard-title">
     <div className="max-w-2xl">
       <h1 id="dashboard-title" className="page-title">Department overview</h1>
-      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted)]">Staff records, academic work and the requests that need your attention.</p>
+      <p className="mt-2 text-sm sm:text-base text-[var(--color-muted)]">Review staff, teaching and outstanding requests at a glance.</p>
     </div>
     <Link href={u.role==="ADMIN"?"/admin":"/leave"} className="btn btn-large">
       {u.role==="ADMIN"?"Review accounts":"Review leave"} <ArrowRight size={17} aria-hidden="true"/>
@@ -40,7 +40,7 @@ export default async function Dashboard(){const u=await requireUser(),manager=is
   <div className="dashboard-priority-grid mb-6">
     <section className="card dashboard-priority p-5 sm:p-6" aria-labelledby="attention-heading">
       <div className="flex items-start justify-between gap-4 mb-5">
-        <div><h2 id="attention-heading" className="section-title">Needs attention</h2><p className="muted text-sm mt-1">Start with work waiting for a decision.</p></div>
+        <div><h2 id="attention-heading" className="section-title">Needs attention</h2><p className="muted text-sm mt-1">Requests currently awaiting a decision.</p></div>
         <span className="priority-icon" aria-hidden="true"><ClipboardList size={21}/></span>
       </div>
       {needsAttention?<div className="space-y-2.5">
@@ -62,7 +62,7 @@ export default async function Dashboard(){const u=await requireUser(),manager=is
     </section>
     <section className="card p-5 sm:p-6" aria-labelledby="quick-actions-heading">
       <h2 id="quick-actions-heading" className="section-title mb-1">Quick actions</h2>
-      <p className="muted text-sm mb-4">Go directly to the tools you need.</p>
+      <p className="muted text-sm mb-4">Common departmental tasks.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
         <Link className="dashboard-quick-link" href="/staff"><UserRoundPlus size={18} aria-hidden="true"/><span>{u.role==="ADMIN"?"Manage staff records":"View staff directory"}</span><ArrowRight size={16} className="ml-auto" aria-hidden="true"/></Link>
         <Link className="dashboard-quick-link" href="/courses"><BookOpen size={18} aria-hidden="true"/><span>Course allocation</span><ArrowRight size={16} className="ml-auto" aria-hidden="true"/></Link>

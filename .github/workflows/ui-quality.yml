@@ -1,0 +1,39 @@
+name: UI quality checks
+
+on:
+  pull_request:
+    paths:
+      - "department-staff-management/**"
+      - ".github/workflows/ui-quality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "department-staff-management/**"
+      - ".github/workflows/ui-quality.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: department-staff-management
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: department-staff-management/package.json
+      - name: Install
+        run: npm install --no-fund
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Offline security smoke tests
+        run: npm run test:smoke
+      - name: Unit tests
+        run: npm run test:unit

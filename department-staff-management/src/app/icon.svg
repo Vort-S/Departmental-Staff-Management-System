@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DSMS">
-  <rect width="64" height="64" rx="13" fill="#1754a6"/>
-  <path d="M18 15h13c13 0 20 8 20 17s-7 17-20 17H18V15zm11 9h-2v16h2c8 0 12-3 12-8s-4-8-12-8z" fill="#fff"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Brig">
+<rect width="64" height="64" rx="15" fill="#11243A"/>
+<path d="M24 12v33M29 12v32" fill="none" stroke="#DFBE78" stroke-width="2" stroke-linecap="round"/>
+<path d="M26 15c9 1 15 5 15 10s-6 8-15 8V15Z" fill="#D3AB5E"/>
+<path d="M31 31c12 1 17 5 17 10s-8 8-17 8V31Z" fill="#E6C989"/>
+<path d="M15 26c-1 8-2 14-5 20l14-2V17l-9 9Z" fill="#BB8E3C"/>
+<path d="M10 49c11-2 25-1 45-2-5 7-14 11-26 10-9-.6-15-3-19-8Z" fill="#D3AB5E"/>
+<path d="M12 49c12 2 28 2 42-2M14 53c13 5 26 5 37 0" fill="none" stroke="#FAE8B9" stroke-width="1.6" stroke-linecap="round"/></svg>
